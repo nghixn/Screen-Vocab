@@ -4,7 +4,7 @@ import UserNotifications
 /// Schedules a single repeating local notification (no server, no push
 /// entitlement needed) that fires at the same time every day to remind the
 /// user to review their words.
-final class NotificationScheduler: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
+final class NotificationScheduler: NSObject, UNUserNotificationCenterDelegate {
     static let shared = NotificationScheduler()
 
     private let reminderIdentifier = "daily-vocab-reminder"

@@ -1,4 +1,5 @@
 import AVFoundation
+import Combine
 
 /// Plays real spoken pronunciation using iOS's on-device text-to-speech.
 /// This is only used from the main app — WidgetKit extensions (Lock Screen /
