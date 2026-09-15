@@ -1,0 +1,65 @@
+name: VocabScreening
+options:
+  bundleIdPrefix: com.nghixn
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+configs:
+  Debug: debug
+  Release: release
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+    TARGETED_DEVICE_FAMILY: "1"
+
+targets:
+  VocabScreening:
+    type: application
+    platform: iOS
+    sources:
+      - path: VocabScreening
+      - path: Shared
+    info:
+      path: VocabScreening/Info.plist
+      properties:
+        CFBundleDisplayName: "Vocab Screening"
+        UILaunchScreen: {}
+        ITSAppUsesNonExemptEncryption: false
+    entitlements:
+      path: VocabScreening/VocabScreening.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.nghixn.vocabscreening
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nghixn.vocabscreening
+        PRODUCT_NAME: "Vocab Screening"
+    dependencies:
+      - target: VocabScreeningWidgetExtension
+        embed: true
+
+  VocabScreeningWidgetExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: VocabScreeningWidget
+      - path: Shared
+    info:
+      path: VocabScreeningWidget/Info.plist
+      properties:
+        CFBundleDisplayName: "Vocab Screening Widget"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: VocabScreeningWidget/VocabScreeningWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.nghixn.vocabscreening
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nghixn.vocabscreening.widget
+        PRODUCT_NAME: "Vocab Screening Widget"
+        SKIP_INSTALL: false

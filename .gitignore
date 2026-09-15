@@ -1,0 +1,16 @@
+# Xcode / Swift
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+DerivedData/
+.build/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# macOS
+.DS_Store
+
+# XcodeGen cache
+.xcodegen_cache/
