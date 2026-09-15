@@ -7,6 +7,7 @@ struct VocabScreeningApp: App {
             ContentView()
                 .onAppear {
                     AppScheduler.refreshIfNeeded()
+                    _ = NotificationScheduler.shared // registers the UNUserNotificationCenter delegate
                 }
         }
     }

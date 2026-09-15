@@ -24,10 +24,13 @@ tăng hiệu quả ghi nhớ so với việc chỉ hiển thị thụ động.
   - `Persistence/SharedStore.swift` — đọc/ghi tiến độ SRS và lịch từ vựng
     vào **App Group container**, để cả app và widget cùng đọc được.
 - **`VocabScreening/`** — app chính (SwiftUI): flashcard active-recall
-  (`FlashcardView`) và màn hình thống kê (`StatsView`). Có nút loa 🔊 để
-  nghe phát âm từ và câu ví dụ, dùng `PronunciationPlayer.swift`
-  (AVSpeechSynthesizer — giọng đọc tiếng Anh tổng hợp trên máy, không cần
-  mạng, giọng en-GB khớp với IPA kiểu Anh-Anh đã ghi trong wordbank).
+  (`FlashcardView`), màn hình thống kê (`StatsView`), và màn hình cài đặt
+  (`SettingsView`). Có nút loa 🔊 để nghe phát âm từ và câu ví dụ, dùng
+  `PronunciationPlayer.swift` (AVSpeechSynthesizer — giọng đọc tiếng Anh
+  tổng hợp trên máy, không cần mạng, giọng en-GB khớp với IPA kiểu Anh-Anh
+  đã ghi trong wordbank). `NotificationScheduler.swift` lên lịch **thông
+  báo nhắc học lặp lại hằng ngày** (local notification, không cần server)
+  vào giờ do người dùng chọn trong Cài đặt.
 - **`VocabScreeningWidget/`** — widget extension (WidgetKit): 1 target
   cung cấp cả widget Lock Screen (`.accessoryRectangular`/`.accessoryInline`
   — chỉ đủ chỗ cho từ + phát âm) và widget Home Screen
@@ -96,4 +99,9 @@ Sau đó, trên thiết bị:
   luôn hiển thị đúng từ đang có trên widget để bấm nghe.
 - Widget Lock Screen chưa hỗ trợ tương tác (bấm Đã nhớ/Chưa nhớ ngay trên
   đó) — thao tác Đã nhớ/Chưa nhớ hiện thực hiện trong app (`FlashcardView`).
-- Chưa có streak/thông báo nhắc học hằng ngày.
+- Thông báo nhắc học hằng ngày dùng nội dung tĩnh (chưa nhúng từ vựng cụ thể
+  của ngày hôm đó) — đây là đánh đổi để lịch nhắc đáng tin cậy kể cả khi
+  người dùng không mở app trong nhiều ngày. Nếu tắt quyền thông báo từ
+  Cài đặt hệ thống, app sẽ tự tắt lại công tắc trong `SettingsView` ở lần
+  mở tiếp theo.
+- Chưa có streak (chuỗi ngày học liên tục).
