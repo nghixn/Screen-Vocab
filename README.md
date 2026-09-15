@@ -11,9 +11,11 @@ tăng hiệu quả ghi nhớ so với việc chỉ hiển thị thụ động.
   extension:
   - `Models/` — `Word`, `WordProgress` (trạng thái SRS của từng từ).
   - `Data/WordBank.swift` — nạp bộ từ vựng từ `Resources/wordbank.json`
-    (121 từ B1-B2, tự biên soạn kèm nghĩa tiếng Việt, IPA, ví dụ — **không**
+    (447 từ A2-B2, tự biên soạn kèm nghĩa tiếng Việt, IPA, ví dụ — **không**
     sao chép danh sách có bản quyền như Oxford 3000/5000, để tránh vấn đề
-    bản quyền).
+    bản quyền. Phủ các chủ đề: cảm xúc/tính cách, công việc, du lịch, công
+    nghệ, sức khoẻ, giáo dục, môi trường, quan hệ xã hội, tiền bạc, động từ
+    học thuật, tính từ mô tả, từ nối, đời sống hàng ngày).
   - `SRS/SRSEngine.swift` — thuật toán Leitner 6 box (1h → 4h → 1 ngày →
     3 ngày → 1 tuần → 3 tuần), điều chỉnh theo phản hồi Đã nhớ/Chưa nhớ.
   - `Scheduling/ScheduleGenerator.swift` — tính sẵn **24 entry cho 24 giờ
@@ -76,8 +78,9 @@ Sau đó, trên thiết bị:
 
 ## Giới hạn hiện tại (MVP)
 
-- Bộ từ vựng mới có 121 từ — cần mở rộng thêm để dùng lâu dài (có thể thêm
-  trực tiếp vào `Shared/Resources/wordbank.json` theo đúng format).
+- Bộ từ vựng hiện có 447 từ (đủ dùng khoảng vài tháng ở nhịp giới thiệu tối đa
+  8 từ mới/ngày) — có thể mở rộng thêm bất cứ lúc nào bằng cách thêm trực tiếp
+  vào `Shared/Resources/wordbank.json` theo đúng format.
 - Chưa có audio phát âm (chỉ có IPA dạng text).
 - Widget Lock Screen chưa hỗ trợ tương tác (bấm Đã nhớ/Chưa nhớ ngay trên
   đó) — thao tác Đã nhớ/Chưa nhớ hiện thực hiện trong app (`FlashcardView`).
