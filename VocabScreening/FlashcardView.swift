@@ -1,3 +1,4 @@
+import AVFoundation
 import SwiftUI
 
 /// Active-recall flashcard: the user sees the word first, tries to recall the
@@ -7,24 +8,46 @@ import SwiftUI
 struct FlashcardView: View {
     @State private var currentWord: Word?
     @State private var revealed = false
+    @StateObject private var player = PronunciationPlayer()
 
     var body: some View {
         VStack(spacing: 24) {
             if let word = currentWord {
                 VStack(spacing: 12) {
                     Text(word.text).font(.largeTitle).bold()
-                    Text(word.ipa).font(.title3).foregroundStyle(.secondary)
+
+                    HStack(spacing: 8) {
+                        Text(word.ipa).font(.title3).foregroundStyle(.secondary)
+                        Button {
+                            player.speak(word.text)
+                        } label: {
+                            Image(systemName: "speaker.wave.2.fill")
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Nghe phát âm")
+                    }
 
                     if revealed {
                         Divider()
                         Text(word.meaningVI).font(.title3)
-                        Text(word.example).font(.body).italic()
+
+                        HStack(spacing: 8) {
+                            Text(word.example).font(.body).italic()
+                            Button {
+                                player.speak(word.example, rate: AVSpeechUtteranceDefaultSpeechRate * 0.95)
+                            } label: {
+                                Image(systemName: "speaker.wave.2")
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Nghe ví dụ")
+                        }
                         Text(word.exampleVI).font(.footnote).foregroundStyle(.secondary)
                     }
                 }
                 .padding()
                 .frame(maxWidth: .infinity)
                 .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+                .contentShape(Rectangle())
                 .onTapGesture { withAnimation { revealed.toggle() } }
                 .padding(.horizontal)
 

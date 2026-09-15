@@ -24,7 +24,10 @@ tăng hiệu quả ghi nhớ so với việc chỉ hiển thị thụ động.
   - `Persistence/SharedStore.swift` — đọc/ghi tiến độ SRS và lịch từ vựng
     vào **App Group container**, để cả app và widget cùng đọc được.
 - **`VocabScreening/`** — app chính (SwiftUI): flashcard active-recall
-  (`FlashcardView`) và màn hình thống kê (`StatsView`).
+  (`FlashcardView`) và màn hình thống kê (`StatsView`). Có nút loa 🔊 để
+  nghe phát âm từ và câu ví dụ, dùng `PronunciationPlayer.swift`
+  (AVSpeechSynthesizer — giọng đọc tiếng Anh tổng hợp trên máy, không cần
+  mạng, giọng en-GB khớp với IPA kiểu Anh-Anh đã ghi trong wordbank).
 - **`VocabScreeningWidget/`** — widget extension (WidgetKit): 1 target
   cung cấp cả widget Lock Screen (`.accessoryRectangular`/`.accessoryInline`
   — chỉ đủ chỗ cho từ + phát âm) và widget Home Screen
@@ -81,7 +84,16 @@ Sau đó, trên thiết bị:
 - Bộ từ vựng hiện có 447 từ (đủ dùng khoảng vài tháng ở nhịp giới thiệu tối đa
   8 từ mới/ngày) — có thể mở rộng thêm bất cứ lúc nào bằng cách thêm trực tiếp
   vào `Shared/Resources/wordbank.json` theo đúng format.
-- Chưa có audio phát âm (chỉ có IPA dạng text).
+- Audio phát âm dùng **text-to-speech tổng hợp trên máy** (AVSpeechSynthesizer),
+  không phải giọng người bản xứ thu âm sẵn. Đây là đánh đổi hợp lý cho MVP:
+  hoạt động offline, phủ đủ cả 447 từ ngay lập tức, không tốn dung lượng app
+  hay phụ thuộc API bên ngoài. Nếu muốn giọng người thật, có thể nâng cấp lên
+  gọi dictionary API (vd. Free Dictionary API) để tải file audio thật và
+  cache lại — nhưng sẽ cần mạng ở lần nghe đầu tiên và không phải từ nào cũng
+  có sẵn audio.
+- Widget (Lock Screen/Home Screen) **không tự phát âm được** — WidgetKit
+  extension không có khả năng phát audio. Chạm vào widget sẽ mở app, và app
+  luôn hiển thị đúng từ đang có trên widget để bấm nghe.
 - Widget Lock Screen chưa hỗ trợ tương tác (bấm Đã nhớ/Chưa nhớ ngay trên
   đó) — thao tác Đã nhớ/Chưa nhớ hiện thực hiện trong app (`FlashcardView`).
 - Chưa có streak/thông báo nhắc học hằng ngày.
