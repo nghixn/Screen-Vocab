@@ -1,15 +1,19 @@
 # Vocab Screening
 
-Ứng dụng iOS hiển thị một từ vựng tiếng Anh (B1-B2) mới mỗi giờ trên **Lock
-Screen widget** và **Home Screen widget**, kèm cơ chế **spaced repetition
-(Leitner)** và **active recall** (chạm để lật thẻ trước khi xem nghĩa) để
-tăng hiệu quả ghi nhớ so với việc chỉ hiển thị thụ động.
+Ứng dụng iOS hiển thị một từ vựng tiếng Anh mới mỗi giờ trên **Lock Screen
+widget** và **Home Screen widget**, theo (các) cấp độ CEFR người dùng tự
+chọn, kèm cơ chế **spaced repetition (Leitner)** và **active recall** (chạm
+để lật thẻ trước khi xem nghĩa) để tăng hiệu quả ghi nhớ so với việc chỉ
+hiển thị thụ động.
 
 ## Kiến trúc
 
 - **`Shared/`** — code + dữ liệu dùng chung giữa app chính và widget
   extension:
-  - `Models/` — `Word`, `WordProgress` (trạng thái SRS của từng từ).
+  - `Models/` — `Word`, `WordProgress` (trạng thái SRS của từng từ),
+    `VocabLevel` (3 cấp CEFR có trong wordbank — A2, B1, B2 — kèm mô tả
+    kiểu "Tôi có thể..." theo thang tự đánh giá CEFR chính thức, để người
+    dùng chọn đúng cấp độ thay vì chỉ nhìn nhãn A2/B1/B2 trần trụi).
   - `Data/WordBank.swift` — nạp bộ từ vựng từ `Resources/wordbank.json`
     (447 từ A2-B2, tự biên soạn kèm nghĩa tiếng Việt, IPA, ví dụ — **không**
     sao chép danh sách có bản quyền như Oxford 3000/5000, để tránh vấn đề
@@ -19,17 +23,21 @@ tăng hiệu quả ghi nhớ so với việc chỉ hiển thị thụ động.
   - `SRS/SRSEngine.swift` — thuật toán Leitner 6 box (1h → 4h → 1 ngày →
     3 ngày → 1 tuần → 3 tuần), điều chỉnh theo phản hồi Đã nhớ/Chưa nhớ.
   - `Scheduling/ScheduleGenerator.swift` — tính sẵn **24 entry cho 24 giờ
-    tới** (từ nào hiển thị vào giờ nào), ưu tiên từ đến hạn ôn tập, sau đó
-    mới giới thiệu từ mới (tối đa 8 từ mới/ngày).
+    tới** (từ nào hiển thị vào giờ nào), chỉ chọn trong số từ thuộc (các)
+    cấp độ đã chọn, ưu tiên từ đến hạn ôn tập, sau đó mới giới thiệu từ mới
+    (tối đa 8 từ mới/ngày).
   - `Persistence/SharedStore.swift` — đọc/ghi tiến độ SRS, lịch từ vựng,
-    và streak vào **App Group container**, để cả app và widget cùng đọc được.
+    streak, và cấp độ đã chọn vào **App Group container**, để cả app và
+    widget cùng đọc được.
   - `Streak/StreakTracker.swift` — đếm **số ngày học liên tiếp**. Chỉ tính
     khi người dùng thực sự lật thẻ và bấm Đã nhớ/Chưa nhớ (không tính chỉ
     mở app hay xem widget), để streak phản ánh đúng việc học thật.
 - **`VocabScreening/`** — app chính (SwiftUI): flashcard active-recall
   (`FlashcardView`, có hiển thị 🔥 streak hiện tại), màn hình thống kê
-  (`StatsView`, có streak hiện tại + kỷ lục), và màn hình cài đặt
-  (`SettingsView`). Có nút loa 🔊 để nghe phát âm từ và câu ví dụ, dùng
+  (`StatsView`, có streak hiện tại + kỷ lục), màn hình cài đặt
+  (`SettingsView`), và màn hình chọn cấp độ (`LevelSelectionView` — có thể
+  chọn nhiều cấp cùng lúc, phải giữ lại ít nhất một cấp). Có nút loa 🔊 để
+  nghe phát âm từ và câu ví dụ, dùng
   `PronunciationPlayer.swift` (AVSpeechSynthesizer — giọng đọc tiếng Anh
   tổng hợp trên máy, không cần mạng, giọng en-GB khớp với IPA kiểu Anh-Anh
   đã ghi trong wordbank). `NotificationScheduler.swift` lên lịch **thông
@@ -81,6 +89,8 @@ lịch 24 giờ đầu tiên.
 
 Sau đó, trên thiết bị:
 
+- Mở app → tab **Cài đặt** → **Cấp độ từ vựng** → chọn cấp độ phù hợp
+  (mặc định chọn cả A2/B1/B2 nếu chưa từng vào chỉnh).
 - **Lock Screen widget**: nhấn giữ màn hình khoá → Tuỳ chỉnh → thêm widget
   "Vocab Screening" (dạng chữ nhật) vào Lock Screen.
 - **Home Screen widget**: nhấn giữ Home Screen → thêm widget → chọn
@@ -108,3 +118,8 @@ Sau đó, trên thiết bị:
   người dùng không mở app trong nhiều ngày. Nếu tắt quyền thông báo từ
   Cài đặt hệ thống, app sẽ tự tắt lại công tắc trong `SettingsView` ở lần
   mở tiếp theo.
+- Nếu đổi lựa chọn cấp độ sau khi đã học một số từ thuộc cấp độ cũ, các số
+  liệu "Đã học"/theo box trong Thống kê vẫn tính cả những từ đó (tiến độ
+  SRS không bị xoá khi đổi cấp độ) — có thể khiến "Đã học" tạm thời lớn hơn
+  "Tổng số từ (cấp độ đã chọn)". Không ảnh hưởng chức năng, chỉ là số liệu
+  hiển thị chưa lọc theo cấp độ hiện tại.

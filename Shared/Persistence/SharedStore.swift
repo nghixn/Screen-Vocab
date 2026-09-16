@@ -27,6 +27,12 @@ enum SharedStore {
         containerURL?.appendingPathComponent("streak.json")
     }
 
+    private static var selectedLevelsURL: URL? {
+        containerURL?.appendingPathComponent("selected_levels.json")
+    }
+
+    private static let defaultLevels = Set(VocabLevel.allCases.map { $0.rawValue })
+
     // MARK: - Per-word SRS progress
 
     static func loadProgress() -> [String: WordProgress] {
@@ -75,6 +81,28 @@ enum SharedStore {
     static func saveStreak(_ streak: StreakData) {
         guard let url = streakURL,
               let data = try? JSONEncoder().encode(streak) else { return }
+        try? data.write(to: url, options: .atomic)
+    }
+
+    // MARK: - Which CEFR levels to draw words from
+
+    /// Defaults to every level (current behavior) until the user picks
+    /// specific ones in Settings. An empty stored set (shouldn't happen,
+    /// but cheap to guard) also falls back to the default rather than
+    /// leaving the word pool empty.
+    static func loadSelectedLevels() -> Set<String> {
+        guard let url = selectedLevelsURL,
+              let data = try? Data(contentsOf: url),
+              let levels = try? JSONDecoder().decode(Set<String>.self, from: data),
+              !levels.isEmpty else {
+            return defaultLevels
+        }
+        return levels
+    }
+
+    static func saveSelectedLevels(_ levels: Set<String>) {
+        guard let url = selectedLevelsURL,
+              let data = try? JSONEncoder().encode(levels) else { return }
         try? data.write(to: url, options: .atomic)
     }
 }

@@ -23,9 +23,32 @@ struct SettingsView: View {
         )
     }
 
+    private var selectedLevelsSummary: String {
+        let selected = SharedStore.loadSelectedLevels()
+        let ordered = VocabLevel.allCases.filter { selected.contains($0.rawValue) }
+        return ordered.map { $0.rawValue }.joined(separator: ", ")
+    }
+
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    NavigationLink {
+                        LevelSelectionView()
+                    } label: {
+                        HStack {
+                            Text("Cấp độ từ vựng")
+                            Spacer()
+                            Text(selectedLevelsSummary)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                } header: {
+                    Text("Nội dung học")
+                } footer: {
+                    Text("Chỉ những từ thuộc (các) cấp độ đã chọn mới xuất hiện trên widget và trong app.")
+                }
+
                 Section {
                     Toggle("Bật thông báo nhắc học", isOn: $reminderEnabled)
                         .onChange(of: reminderEnabled) { enabled in

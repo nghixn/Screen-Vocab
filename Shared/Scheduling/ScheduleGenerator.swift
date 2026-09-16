@@ -10,7 +10,8 @@ enum ScheduleGenerator {
     @discardableResult
     static func generateNextHours(count: Int = 24, from startDate: Date = Date()) -> [SharedStore.ScheduleEntry] {
         var progress = SharedStore.loadProgress()
-        let allWords = WordBank.shared
+        let selectedLevels = SharedStore.loadSelectedLevels()
+        let allWords = WordBank.shared.filter { selectedLevels.contains($0.cefr) }
         guard !allWords.isEmpty else { return [] }
 
         let calendar = Calendar.current

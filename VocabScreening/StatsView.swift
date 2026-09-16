@@ -13,6 +13,11 @@ struct StatsView: View {
         StreakTracker.currentStatus()
     }
 
+    private var wordsInSelectedLevels: Int {
+        let selected = SharedStore.loadSelectedLevels()
+        return WordBank.shared.filter { selected.contains($0.cefr) }.count
+    }
+
     var body: some View {
         NavigationStack {
             List {
@@ -26,7 +31,7 @@ struct StatsView: View {
                     LabeledContent("Kỷ lục", value: "\(streak.longestStreak) ngày")
                 }
                 Section("Tổng quan") {
-                    LabeledContent("Tổng số từ", value: "\(WordBank.shared.count)")
+                    LabeledContent("Tổng số từ (cấp độ đã chọn)", value: "\(wordsInSelectedLevels)")
                     LabeledContent("Đã học", value: "\(progress.count)")
                     LabeledContent("Đã thuộc (box ≥ 5)", value: "\(progress.values.filter { $0.box >= 5 }.count)")
                 }
