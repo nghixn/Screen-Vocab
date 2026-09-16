@@ -1,7 +1,13 @@
 import SwiftUI
 
 struct StatsView: View {
-    @State private var progress: [String: WordProgress] = [:]
+    // Read fresh from disk on every body evaluation (including tab
+    // switches) instead of caching in @State — caching + .onAppear was
+    // unreliable here since this view sits inside a NavigationStack inside
+    // a TabView, where onAppear doesn't always refire on tab reselection.
+    private var progress: [String: WordProgress] {
+        SharedStore.loadProgress()
+    }
 
     var body: some View {
         NavigationStack {
@@ -18,7 +24,6 @@ struct StatsView: View {
                 }
             }
             .navigationTitle("Thống kê")
-            .onAppear { progress = SharedStore.loadProgress() }
         }
     }
 }

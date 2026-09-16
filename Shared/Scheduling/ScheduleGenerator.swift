@@ -40,6 +40,11 @@ enum ScheduleGenerator {
                       let newWord = allWords.first(where: { progress[$0.id] == nil && !usedThisRun.contains($0.id) }) {
                 chosen = newWord
                 newWordsIntroduced += 1
+            } else if let reviewWord = allWords.first(where: { progress[$0.id] != nil && !usedThisRun.contains($0.id) }) {
+                // Re-show an already-introduced word ahead of its due date
+                // rather than introducing another brand-new one — this is
+                // what actually keeps the "8 new words/day" cap meaningful.
+                chosen = reviewWord
             } else if let fallback = allWords.filter({ !usedThisRun.contains($0.id) }).randomElement() {
                 chosen = fallback
             } else {
