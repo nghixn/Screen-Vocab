@@ -10,8 +10,14 @@ final class PronunciationPlayer: NSObject, ObservableObject {
 
     override init() {
         super.init()
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio)
-        try? AVAudioSession.sharedInstance().setActive(true)
+        // Configuring/activating the session synchronously on the main
+        // thread (where this init runs, since it's a @StateObject) can
+        // block the UI — do it off the main thread instead, as Apple
+        // recommends (AVAudioSession_iOS.mm warning otherwise).
+        DispatchQueue.global(qos: .userInitiated).async {
+            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio)
+            try? AVAudioSession.sharedInstance().setActive(true)
+        }
     }
 
     func speak(_ text: String, rate: Float = AVSpeechUtteranceDefaultSpeechRate * 0.85) {
