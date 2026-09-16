@@ -10,8 +10,23 @@ struct FlashcardView: View {
     @State private var revealed = false
     @StateObject private var player = PronunciationPlayer()
 
+    // Computed, not cached in @State, so it reflects the latest streak
+    // right after answer() records today's activity.
+    private var streak: StreakData {
+        StreakTracker.currentStatus()
+    }
+
     var body: some View {
         VStack(spacing: 24) {
+            if streak.currentStreak > 0 {
+                HStack(spacing: 4) {
+                    Image(systemName: "flame.fill").foregroundStyle(.orange)
+                    Text("\(streak.currentStreak) ngày liên tiếp")
+                }
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            }
+
             if let word = currentWord {
                 VStack(spacing: 12) {
                     Text(word.text).font(.largeTitle).bold()
@@ -88,6 +103,7 @@ struct FlashcardView: View {
         let existing = progress[word.id] ?? WordProgress(wordId: word.id, box: 1, nextDueDate: Date())
         progress[word.id] = SRSEngine.recordResult(progress: existing, remembered: remembered)
         SharedStore.saveProgress(progress)
+        StreakTracker.recordActivity()
         AppScheduler.regenerateAndReload()
         loadCurrentWord()
     }

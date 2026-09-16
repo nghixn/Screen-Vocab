@@ -9,9 +9,22 @@ struct StatsView: View {
         SharedStore.loadProgress()
     }
 
+    private var streak: StreakData {
+        StreakTracker.currentStatus()
+    }
+
     var body: some View {
         NavigationStack {
             List {
+                Section("Chuỗi ngày học") {
+                    LabeledContent {
+                        Text("\(streak.currentStreak) ngày")
+                    } label: {
+                        Label("Hiện tại", systemImage: "flame.fill")
+                            .foregroundStyle(.orange)
+                    }
+                    LabeledContent("Kỷ lục", value: "\(streak.longestStreak) ngày")
+                }
                 Section("Tổng quan") {
                     LabeledContent("Tổng số từ", value: "\(WordBank.shared.count)")
                     LabeledContent("Đã học", value: "\(progress.count)")

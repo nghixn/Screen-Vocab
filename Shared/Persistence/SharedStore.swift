@@ -23,6 +23,10 @@ enum SharedStore {
         containerURL?.appendingPathComponent("hourly_schedule.json")
     }
 
+    private static var streakURL: URL? {
+        containerURL?.appendingPathComponent("streak.json")
+    }
+
     // MARK: - Per-word SRS progress
 
     static func loadProgress() -> [String: WordProgress] {
@@ -54,6 +58,23 @@ enum SharedStore {
     static func saveSchedule(_ entries: [ScheduleEntry]) {
         guard let url = scheduleURL,
               let data = try? JSONEncoder().encode(entries) else { return }
+        try? data.write(to: url, options: .atomic)
+    }
+
+    // MARK: - Daily learning streak
+
+    static func loadStreak() -> StreakData {
+        guard let url = streakURL,
+              let data = try? Data(contentsOf: url),
+              let streak = try? JSONDecoder().decode(StreakData.self, from: data) else {
+            return StreakData()
+        }
+        return streak
+    }
+
+    static func saveStreak(_ streak: StreakData) {
+        guard let url = streakURL,
+              let data = try? JSONEncoder().encode(streak) else { return }
         try? data.write(to: url, options: .atomic)
     }
 }

@@ -21,10 +21,14 @@ tăng hiệu quả ghi nhớ so với việc chỉ hiển thị thụ động.
   - `Scheduling/ScheduleGenerator.swift` — tính sẵn **24 entry cho 24 giờ
     tới** (từ nào hiển thị vào giờ nào), ưu tiên từ đến hạn ôn tập, sau đó
     mới giới thiệu từ mới (tối đa 8 từ mới/ngày).
-  - `Persistence/SharedStore.swift` — đọc/ghi tiến độ SRS và lịch từ vựng
-    vào **App Group container**, để cả app và widget cùng đọc được.
+  - `Persistence/SharedStore.swift` — đọc/ghi tiến độ SRS, lịch từ vựng,
+    và streak vào **App Group container**, để cả app và widget cùng đọc được.
+  - `Streak/StreakTracker.swift` — đếm **số ngày học liên tiếp**. Chỉ tính
+    khi người dùng thực sự lật thẻ và bấm Đã nhớ/Chưa nhớ (không tính chỉ
+    mở app hay xem widget), để streak phản ánh đúng việc học thật.
 - **`VocabScreening/`** — app chính (SwiftUI): flashcard active-recall
-  (`FlashcardView`), màn hình thống kê (`StatsView`), và màn hình cài đặt
+  (`FlashcardView`, có hiển thị 🔥 streak hiện tại), màn hình thống kê
+  (`StatsView`, có streak hiện tại + kỷ lục), và màn hình cài đặt
   (`SettingsView`). Có nút loa 🔊 để nghe phát âm từ và câu ví dụ, dùng
   `PronunciationPlayer.swift` (AVSpeechSynthesizer — giọng đọc tiếng Anh
   tổng hợp trên máy, không cần mạng, giọng en-GB khớp với IPA kiểu Anh-Anh
@@ -104,4 +108,3 @@ Sau đó, trên thiết bị:
   người dùng không mở app trong nhiều ngày. Nếu tắt quyền thông báo từ
   Cài đặt hệ thống, app sẽ tự tắt lại công tắc trong `SettingsView` ở lần
   mở tiếp theo.
-- Chưa có streak (chuỗi ngày học liên tục).
