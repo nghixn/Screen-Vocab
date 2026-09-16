@@ -38,10 +38,13 @@ enum ScheduleGenerator {
             if let due = dueWords.first {
                 chosen = due
             } else if newWordsIntroduced < newWordsPerDay,
-                      let newWord = allWords.first(where: { progress[$0.id] == nil && !usedThisRun.contains($0.id) }) {
+                      let newWord = allWords.filter({ progress[$0.id] == nil && !usedThisRun.contains($0.id) }).randomElement() {
+                // .randomElement() here, not .first(where:) — wordbank.json
+                // is written in alphabetical order, so .first(where:) would
+                // introduce new words strictly A→Z instead of varied.
                 chosen = newWord
                 newWordsIntroduced += 1
-            } else if let reviewWord = allWords.first(where: { progress[$0.id] != nil && !usedThisRun.contains($0.id) }) {
+            } else if let reviewWord = allWords.filter({ progress[$0.id] != nil && !usedThisRun.contains($0.id) }).randomElement() {
                 // Re-show an already-introduced word ahead of its due date
                 // rather than introducing another brand-new one — this is
                 // what actually keeps the "8 new words/day" cap meaningful.
