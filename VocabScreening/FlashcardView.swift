@@ -1,23 +1,24 @@
 import AVFoundation
 import SwiftUI
 
-/// Active-recall flashcard: the user sees the word first, tries to recall the
-/// meaning, then taps to reveal it before marking Remembered / Forgot. This
-/// feeds the SRS engine, which is what makes the hourly word rotation get
-/// smarter over time instead of staying purely random.
+/// Multiple-choice quiz: the user picks the correct meaning out of 4 options
+/// instead of self-reporting "Remembered/Forgot" — a self-report is easy to
+/// fudge without noticing, while an actual quiz answer is an objective
+/// signal that feeds the SRS engine.
 struct FlashcardView: View {
     @State private var currentWord: Word?
-    @State private var revealed = false
+    @State private var choices: [Word] = []
+    @State private var selectedChoice: Word?
     @StateObject private var player = PronunciationPlayer()
 
-    // Computed, not cached in @State, so it reflects the latest streak
-    // right after answer() records today's activity.
     private var streak: StreakData {
         StreakTracker.currentStatus()
     }
 
+    private var isAnswered: Bool { selectedChoice != nil }
+
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 20) {
             if streak.currentStreak > 0 {
                 HStack(spacing: 4) {
                     Image(systemName: "flame.fill").foregroundStyle(.orange)
@@ -41,11 +42,43 @@ struct FlashcardView: View {
                         .buttonStyle(.plain)
                         .accessibilityLabel("Nghe phát âm")
                     }
+                }
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+                .padding(.horizontal)
 
-                    if revealed {
-                        Divider()
-                        Text(word.meaningVI).font(.title3)
+                Text("Từ này có nghĩa là gì?")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
 
+                VStack(spacing: 10) {
+                    ForEach(choices) { choice in
+                        Button {
+                            submitAnswer(choice)
+                        } label: {
+                            HStack {
+                                Text(choice.meaningVI)
+                                    .multilineTextAlignment(.leading)
+                                Spacer()
+                                if isAnswered && choice.id == word.id {
+                                    Image(systemName: "checkmark.circle.fill")
+                                } else if isAnswered && choice.id == selectedChoice?.id {
+                                    Image(systemName: "xmark.circle.fill")
+                                }
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(choiceBackground(for: choice, correct: word), in: RoundedRectangle(cornerRadius: 12))
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(isAnswered)
+                    }
+                }
+                .padding(.horizontal)
+
+                if isAnswered {
+                    VStack(spacing: 6) {
                         HStack(spacing: 8) {
                             Text(word.example).font(.body).italic()
                             Button {
@@ -58,25 +91,10 @@ struct FlashcardView: View {
                         }
                         Text(word.exampleVI).font(.footnote).foregroundStyle(.secondary)
                     }
-                }
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
-                .contentShape(Rectangle())
-                .onTapGesture { withAnimation { revealed.toggle() } }
-                .padding(.horizontal)
+                    .padding(.horizontal)
 
-                if revealed {
-                    HStack(spacing: 16) {
-                        Button("Chưa nhớ") { answer(remembered: false) }
-                            .buttonStyle(.bordered)
-                        Button("Đã nhớ") { answer(remembered: true) }
-                            .buttonStyle(.borderedProminent)
-                    }
-                } else {
-                    Text("Chạm vào thẻ để xem nghĩa")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    Button("Từ tiếp theo") { loadCurrentWord() }
+                        .buttonStyle(.borderedProminent)
                 }
             } else {
                 ProgressView()
@@ -86,25 +104,49 @@ struct FlashcardView: View {
         .onAppear(perform: loadCurrentWord)
     }
 
+    private func choiceBackground(for choice: Word, correct: Word) -> Color {
+        guard isAnswered else { return Color.secondary.opacity(0.1) }
+        if choice.id == correct.id {
+            return Color.green.opacity(0.25)
+        } else if choice.id == selectedChoice?.id {
+            return Color.red.opacity(0.25)
+        }
+        return Color.secondary.opacity(0.1)
+    }
+
     private func loadCurrentWord() {
         let schedule = SharedStore.loadSchedule().sorted { $0.date < $1.date }
         let now = Date()
+        let nextWord: Word?
         if let entry = schedule.last(where: { $0.date <= now }) ?? schedule.first {
-            currentWord = WordBank.word(byId: entry.wordId)
+            nextWord = WordBank.word(byId: entry.wordId)
         } else {
-            currentWord = WordBank.shared.randomElement()
+            nextWord = WordBank.shared.randomElement()
         }
-        revealed = false
+
+        currentWord = nextWord
+        selectedChoice = nil
+        choices = nextWord.map(makeChoices) ?? []
     }
 
-    private func answer(remembered: Bool) {
-        guard let word = currentWord else { return }
+    private func makeChoices(for word: Word) -> [Word] {
+        let distractorPool = WordBank.shared.filter { $0.id != word.id && $0.meaningVI != word.meaningVI }
+        let distractors = Array(distractorPool.shuffled().prefix(3))
+        var all = distractors + [word]
+        all.shuffle()
+        return all
+    }
+
+    private func submitAnswer(_ choice: Word) {
+        guard !isAnswered, let word = currentWord else { return }
+        selectedChoice = choice
+        let remembered = choice.id == word.id
+
         var progress = SharedStore.loadProgress()
         let existing = progress[word.id] ?? WordProgress(wordId: word.id, box: 1, nextDueDate: Date())
         progress[word.id] = SRSEngine.recordResult(progress: existing, remembered: remembered)
         SharedStore.saveProgress(progress)
         StreakTracker.recordActivity()
         AppScheduler.regenerateAndReload()
-        loadCurrentWord()
     }
 }
